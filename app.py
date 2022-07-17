@@ -4,6 +4,15 @@ from numpy import char
 import speech_recognition as sr
 from PIL import Image, ImageTk
 from tkinter.filedialog import askopenfile
+import mysql.connector
+from datetime import datetime
+
+mydb = mysql.connector.connect(host="localhost",user="root",database="transcribe",passwd="123456")
+
+
+while True:
+    user=input("enter your name : ")
+    break
 
 root = tk.Tk()
 root.title("audio to text converter")
@@ -17,9 +26,11 @@ logo_label = tk.Label(image=logo)
 logo_label.image = logo
 logo_label.grid(column=1, row=0)
 
+
 #instructions
 instructions = tk.Label(root, text="Select a audio file", font="Raleway")
 instructions.grid(columnspan=3, column=0, row=1)
+
 
 def open_file():
     browse_text.set("loading...")
@@ -37,10 +48,21 @@ def open_file():
             report.write (text)
             report.close()
 
+            time_now = datetime.now()
+            dStr = time_now.strftime("%y-%m-%d")
+            tStr = time_now.strftime("%H:%M:%S")
+            
+            mycursor= mydb.cursor()
+            s="INSERT INTO books (Date,USER,Transcribe_Data,Time) VALUES(%s,%s,%s,%s) "
+            b1=(dStr,user,text,tStr)
+            mycursor.execute(s,b1)
+            mydb.commit()
+
             page =open('output.txt','r')
             content=page.read()
             print(content)
-            
+            print(user)
+
             
 
             text_box = tk.Text(root, height=10, width=50, padx=15, pady=15)
